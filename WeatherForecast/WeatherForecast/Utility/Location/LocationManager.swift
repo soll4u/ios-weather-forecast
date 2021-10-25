@@ -44,7 +44,9 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
             print("권한 요청 거부됨")
             // TODO: - Alert + Error 처리
             return
-        case .restricted, .notDetermined:
+        case .restricted:
+            print("권한이 제한됨")
+        case .notDetermined:
             print("권한 요청 되지 않음")
             manager.requestWhenInUseAuthorization()
             manager.requestLocation()
