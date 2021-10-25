@@ -84,7 +84,6 @@ class WeatherViewController: UIViewController {
         headerView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 100)
         headerView.translatesAutoresizingMaskIntoConstraints = false
         weatherTableView.tableHeaderView = headerView
-        headerView.layoutIfNeeded()
     }
     
     private func updateTableHeaderView() {
