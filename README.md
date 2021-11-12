@@ -82,7 +82,7 @@ private enum Codingkeys: String, CodingKey {
 2. `URLSession`이 `URLSessionProtocol`을 채택한다.
 3. `URLSessionProtocol`은 필수 구현 메서드인 `makeCustomDataTask(_:_:) -> URLSessionDataTaskProtocol`을 가진다.
 4. `WeatherNetworkManager`는 `URLSessionProtocol`를 준수하는 타입을 초기자로 받도록 만들어서 의존성을 주입했다.
-5. 그리고 `fetchData(with:completion:)`메서드 내부에서 session의 `makeCustomDataTask(with:completion:)`을 통해 URLSessionDataTask를 만들어주었다.
+5. 그리고 `fetchData(with:completion:)`메서드 내부에서 session의 `makeCustomDataTask(with:completion:)`을 통해 `URLSessionDataTask`를 만들어주었다.
 
 ```swift
 extension URLSessionDataTask: URLSessionDataTaskProtocol {} // 1번
