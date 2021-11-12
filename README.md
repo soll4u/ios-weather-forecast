@@ -76,9 +76,39 @@ private enum Codingkeys: String, CodingKey {
 
 [![img](https://camo.githubusercontent.com/8bfe9b5e733e403a7be769d394f9b82e611be0f969c6645316c760787a951969/68747470733a2f2f692e696d6775722e636f6d2f4d675a726d6e6b2e706e67)](https://camo.githubusercontent.com/8bfe9b5e733e403a7be769d394f9b82e611be0f969c6645316c760787a951969/68747470733a2f2f692e696d6775722e636f6d2f4d675a726d6e6b2e706e67)
 
-- `URLSessionDataTask`를 상속한 `MockURLSessionDataTask`의 init()이 iOS 13부터 deprecated 되기 때문에 다른 방식으로 구현을 고민했다.
-- `URLSessionDataTaskProtocol` 을 정의하고, `URLSessionDataTask`가 프로토콜을 채택하도록 바꿨다.
-- 새롭게 변형된 반환값을 맞추기위해 `makeCustomDataTask(_:_:) -> URLSessionDataTaskProtocol` 메서드를 `URLSessionProtocol`로 주입했다.
+`URLSessionDataTask`를 상속한 `MockURLSessionDataTask`의 init()이 iOS 13부터 deprecated 되기 때문에 다른 방식으로 구현을 고민했다.
+
+1. `URLSessionDataTask`가 `URLSessionDataTaskProtocol`을 채택한다.
+2. `URLSession`이 `URLSessionProtocol`을 채택한다.
+3. `URLSessionProtocol`은 필수 구현 메서드인 `makeCustomDataTask(_:_:) -> URLSessionDataTaskProtocol`을 가진다.
+4. `WeatherNetworkManager`는 `URLSessionProtocol`를 준수하는 타입을 초기자로 받도록 만들어서 의존성을 주입했다.
+5. 그리고 `fetchData(with:completion:)`메서드 내부에서 session의 `makeCustomDataTask(with:completion:)`을 통해 URLSessionDataTask를 만들어주었다.
+
+```swift
+extension URLSessionDataTask: URLSessionDataTaskProtocol {} // 1번
+
+extension URLSession: URLSessionProtocol { // 2번
+    func makeCustomDataTask(with url: URL, 
+                            completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void)
+    -> URLSessionDataTaskProtocol {
+        return dataTask(with: url, completionHandler: completionHandler) as URLSessionDataTaskProtocol
+    } // 3번 
+}
+
+struct WeatherNetworkManager {
+    private let session: URLSessionProtocol
+    
+    init(session: URLSessionProtocol) { // 4번
+        self.session = session
+    }
+    
+    func fetchData(with url: URL, completion: @escaping (Result<Data, Error>) -> Void) { // 5번
+        session.makeCustomDataTask(with: url) { data, response, error in
+            // ...
+        }.resume()
+    }
+}
+```
 
 <br>
 
